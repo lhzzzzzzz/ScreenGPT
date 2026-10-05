@@ -15,7 +15,7 @@ swift test
 ./scripts/package.sh
 codesign --verify --deep --strict dist/ScreenGPT.app
 hdiutil verify dist/ScreenGPT-macOS.dmg
-lipo -verify_arch arm64 x86_64 dist/ScreenGPT.app/Contents/MacOS/ScreenGPT
+lipo dist/ScreenGPT.app/Contents/MacOS/ScreenGPT -verify_arch arm64 x86_64
 cd dist
 shasum -a 256 ScreenGPT-macOS.dmg ScreenGPT-macOS.zip > SHA256SUMS.txt
 ```
