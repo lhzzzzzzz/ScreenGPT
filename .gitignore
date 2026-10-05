@@ -1,0 +1,10 @@
+.build/
+dist/
+.DS_Store
+.swiftpm/
+*.dylib
+*.p12
+*.mobileprovision
+*.key
+.env*
+!.env.example
