@@ -4,7 +4,7 @@
 
 ## 当前测试版
 
-`v0.1.1` 为公开测试版（Pre-release），使用 ad hoc 临时签名，尚未 Apple 公证。macOS 可能拦截首次启动；Release 和 README 均说明该限制。测试版不代表真实截图、模型请求、所有芯片或系统环境已经完成验收，检查结果见 [VERIFICATION.md](VERIFICATION.md)。
+`v0.2.1` 为当前公开测试版（Pre-release），使用 ad hoc 临时签名，尚未 Apple 公证。macOS 可能拦截首次启动；Release 和 README 均说明该限制。本机已验证真实截图、翻译和多轮提问；Intel 实机、多显示器、macOS 14 干净安装及公证安装仍待验收，检查结果见 [VERIFICATION.md](VERIFICATION.md)。
 
 ## 构建与校验
 

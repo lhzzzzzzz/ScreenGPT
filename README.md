@@ -4,19 +4,19 @@
 
 ScreenGPT 是一款 macOS 菜单栏应用：按下快捷键，框选屏幕上的一小块内容，再让 ChatGPT 帮你解题、翻译或回答问题。它适用于 macOS 14 或更新版本，界面支持简体中文和英文。
 
-[下载 v0.1.1 测试版](https://github.com/lhzzzzzzz/ScreenGPT/releases/tag/v0.1.1) · [更新记录](CHANGELOG.md) · [报告问题](https://github.com/lhzzzzzzz/ScreenGPT/issues) · [参与开发](CONTRIBUTING.md)
+[下载 v0.2.1 测试版](https://github.com/lhzzzzzzz/ScreenGPT/releases/tag/v0.2.1) · [更新记录](CHANGELOG.md) · [报告问题](https://github.com/lhzzzzzzz/ScreenGPT/issues) · [参与开发](CONTRIBUTING.md)
 
 ## 下载与安装
 
 | 下载 | 用途 |
 | --- | --- |
-| [ScreenGPT-macOS.dmg](https://github.com/lhzzzzzzz/ScreenGPT/releases/download/v0.1.1/ScreenGPT-macOS.dmg) | 推荐：打开后拖到“应用程序” |
-| [ScreenGPT-macOS.zip](https://github.com/lhzzzzzzz/ScreenGPT/releases/download/v0.1.1/ScreenGPT-macOS.zip) | 解压得到同一版本的 ScreenGPT.app |
-| [SHA256SUMS.txt](https://github.com/lhzzzzzzz/ScreenGPT/releases/download/v0.1.1/SHA256SUMS.txt) | 下载文件的完整性校验 |
+| [ScreenGPT-macOS.dmg](https://github.com/lhzzzzzzz/ScreenGPT/releases/download/v0.2.1/ScreenGPT-macOS.dmg) | 推荐：打开后拖到“应用程序” |
+| [ScreenGPT-macOS.zip](https://github.com/lhzzzzzzz/ScreenGPT/releases/download/v0.2.1/ScreenGPT-macOS.zip) | 解压得到同一版本的 ScreenGPT.app |
+| [SHA256SUMS.txt](https://github.com/lhzzzzzzz/ScreenGPT/releases/download/v0.2.1/SHA256SUMS.txt) | 下载文件的完整性校验 |
 
 需要 **macOS 14+**。安装包同时包含 Apple 芯片与 Intel 架构；Intel 实机尚未验证。使用模型需要联网及具有相应授权的 ChatGPT 账号。
 
-**v0.1.1 是已发布的公开测试版；当前源码版本为 0.2.1，尚未作为 GitHub Release 发布。** 构建使用临时签名，尚未经过 Apple 公证。升级前建议先保留当前安装的 ScreenGPT 副本。首次打开可能被 macOS 拦截，请先阅读下方[安装提示](#安装提示)。最新验证范围见[验证记录](docs/VERIFICATION.md)。
+**v0.2.1 是当前公开测试版，安装包与源码版本一致。** 构建使用临时签名，尚未经过 Apple 公证。升级前建议先保留当前安装的 ScreenGPT 副本。首次打开可能被 macOS 拦截，请先阅读下方[安装提示](#安装提示)。最新验证范围见[验证记录](docs/VERIFICATION.md)。
 
 ![ScreenGPT 界面预览：小选区翻译](docs/images/preview-small.png)
 
@@ -33,7 +33,7 @@ ScreenGPT 是一款 macOS 菜单栏应用：按下快捷键，框选屏幕上的
 
 0.1.3 起，回答浮窗和已保存记录会排版 Markdown 标题、列表、引用、代码块与表格；宽代码块和表格可横向滚动。复制和保存保留原始 Markdown，已有记录无需转换。可在“关于 → 试用界面预览”查看排版示例，预览不调用模型。
 
-在“ChatGPT 账号”页，可以分别选择**做题模型**和**翻译模型**，各自设置“自动、轻度、中度、高度、极高”思考强度。只显示模型支持且已确认的档位；自动使用模型默认强度。两套设置互不影响，例如做题使用较强的推理模型，翻译使用更快的模型。旧版的单一模型选择会保留为两项的初始值。
+在“ChatGPT 账号”页，可以分别选择**做题、翻译和提问模型**，各自设置“自动、轻度、中度、高度、极高”思考强度。只显示模型支持且已确认的档位；自动使用模型默认强度。三套设置互不影响，例如做题使用较强的推理模型，翻译使用更快的模型。升级时会保留已有配置，新增的提问配置默认采用做题配置。
 
 0.2.1 起，已有翻译时修改原文语言、目标语言或交换语言会自动重新翻译当前选区。切换语言会开启一轮新的翻译，之后的追问基于新译文；未发送的提问草稿会保留。首次翻译前选语言不会自动上传图片。
 
@@ -71,7 +71,7 @@ Intel Mac 可用 `ARCHS=x86_64`。开发和人工验收步骤见[开发说明](d
 
 ## 项目状态
 
-当前源码 0.2.1 支持中英文界面、按需展开的提问输入框、连续追问和切换语言自动重新翻译，并保留 Markdown 排版及选区移动、缩放功能。71 项自动测试通过，已在本机生成通用安装包。实际验证范围与尚待验证的项目见[验证记录](docs/VERIFICATION.md)。
+当前公开测试版 0.2.1 支持中英文界面、按需展开的提问输入框、连续追问和切换语言自动重新翻译，并保留 Markdown 排版及选区移动、缩放功能。71 项自动测试通过，GitHub Actions 已验证通用安装包构建与校验。实际验证范围与尚待验证的项目见[验证记录](docs/VERIFICATION.md)。
 
 ScreenGPT 是独立开源项目，与 OpenAI 无隶属关系。AI 输出可能有误，请结合原始内容核对。
 

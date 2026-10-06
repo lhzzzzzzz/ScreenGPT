@@ -52,7 +52,7 @@
           <h1 id="hero-title">看懂屏幕，<br><span>只需一框。</span></h1>
           <p class="hero-description">框选英文、题目或一张图，让 ChatGPT 帮你翻译、解题。回答就出现在旁边。</p>
           <div class="hero-actions">
-            <a class="button" href="https://github.com/lhzzzzzzz/ScreenGPT/releases/download/v0.1.1/ScreenGPT-macOS.dmg" aria-describedby="download-note">下载 Mac 测试版 <span aria-hidden="true">↓</span></a>
+            <a class="button" href="https://github.com/lhzzzzzzz/ScreenGPT/releases/download/v0.2.1/ScreenGPT-macOS.dmg" aria-describedby="download-note">下载 Mac 测试版 <span aria-hidden="true">↓</span></a>
             <a class="text-link" href="#install">如何安装 <span aria-hidden="true">↗</span></a>
           </div>
         </div>
@@ -65,7 +65,7 @@
       </section>
 
       <div class="release-note shell" id="download-note">
-        <p><strong>公开测试版 v0.1.1</strong><span>macOS 14+，含 Apple 芯片与 Intel 架构；Intel 实机尚未验证。</span></p>
+        <p><strong>公开测试版 v0.2.1</strong><span>macOS 14+，含 Apple 芯片与 Intel 架构；Intel 实机尚未验证。</span></p>
         <p>需要联网及具有相应授权的 ChatGPT 账号。安装包尚未 Apple 公证，首次打开可能被拦截，请查看<a href="#first-open">安装提示</a>。</p>
       </div>
 
@@ -83,12 +83,12 @@
       <section class="workflow shell" aria-labelledby="workflow-title">
         <div>
           <h2 id="workflow-title">用起来，像截屏一样。</h2>
-          <p>留在正在看的内容里，少一次切换。</p>
+          <p>界面支持中英文。需要时展开输入框继续追问；翻译后切换语言，译文自动更新。</p>
         </div>
         <ol class="workflow-steps">
           <li><span class="shortcut" aria-label="Command Shift D"><kbd>⌘</kbd><kbd>⇧</kbd><kbd>D</kbd></span><span>快捷键唤起</span></li>
           <li><strong>框选</strong><span>选中需要的区域</span></li>
-          <li><strong>翻译 / 做题</strong><span>在旁边查看回答</span></li>
+          <li><strong>翻译 / 做题 / 提问</strong><span>在旁边查看回答</span></li>
         </ol>
       </section>
 
@@ -133,11 +133,11 @@
           </details>
           <details>
             <summary>会把整个屏幕发送出去吗？</summary>
-            <div class="answer"><p>只有你明确点击“翻译”或“做题”后，应用才会把选中的裁剪区域发送给模型。完整屏幕画面用于本机显示和框选，不会作为请求内容发送。登录凭据保存在 macOS 钥匙串中。</p><p>自动保存默认关闭。手动或自动保存的记录会包含截图和回答，保存在本机。<a href="https://github.com/lhzzzzzzz/ScreenGPT/blob/main/docs/PRIVACY.md">阅读完整隐私说明</a>。</p></div>
+            <div class="answer"><p>点击“翻译”“做题”或发送问题时，应用会把当前选中的裁剪区域发送给模型；追问还会携带本次选区已有的对话上下文。翻译完成后更改原文或译文语言时，也会自动重新发送该裁剪图。完整屏幕画面仅用于本机显示和框选，不会作为请求内容发送。登录凭据保存在 macOS 钥匙串中。</p><p>自动保存默认关闭。手动或自动保存的记录会包含截图与可见问答，保存在本机。<a href="https://github.com/lhzzzzzzz/ScreenGPT/blob/main/docs/PRIVACY.md">阅读完整隐私说明</a>。</p></div>
           </details>
           <details>
             <summary>支持哪些 Mac？遇到问题怎么办？</summary>
-            <div class="answer"><p>需要 macOS 14 或更新版本。安装包包含 Apple 芯片与 Intel 架构，Intel 实机尚未验证。当前为早期测试版，多显示器等场景仍需进一步验证。</p><p>你可以<a href="https://github.com/lhzzzzzzz/ScreenGPT/issues">报告问题或建议</a>，也可以查看<a href="https://github.com/lhzzzzzzz/ScreenGPT/releases/tag/v0.1.1">版本说明、ZIP 安装包与校验文件</a>。</p></div>
+            <div class="answer"><p>需要 macOS 14 或更新版本。安装包包含 Apple 芯片与 Intel 架构，Intel 实机尚未验证。当前为早期测试版，多显示器等场景仍需进一步验证。</p><p>你可以<a href="https://github.com/lhzzzzzzz/ScreenGPT/issues">报告问题或建议</a>，也可以查看<a href="https://github.com/lhzzzzzzz/ScreenGPT/releases/tag/v0.2.1">版本说明、ZIP 安装包与校验文件</a>。</p></div>
           </details>
         </div>
       </section>
