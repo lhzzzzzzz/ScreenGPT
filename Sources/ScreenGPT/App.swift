@@ -15,7 +15,7 @@ import Combine
     private var pendingCapture: Task<Void, Never>?
     private var captureRequest = UUID()
     private var awaitingScreenPermission = false
-    private let screenPermissionHelp = "截屏还未开始：请在 macOS 系统设置的「隐私与安全性 → 屏幕录制」中允许 ScreenGPT。若开关已经开启，请完全退出 ScreenGPT 后重新打开，再按快捷键。"
+    private var screenPermissionHelp: String { L("截屏还未开始：请在 macOS 系统设置的「隐私与安全性 → 屏幕录制」中允许 ScreenGPT。若开关已经开启，请完全退出 ScreenGPT 后重新打开，再按快捷键。", "Screen capture has not started. Allow ScreenGPT under macOS System Settings → Privacy & Security → Screen Recording. If it is already enabled, fully quit and reopen ScreenGPT, then press the shortcut.") }
     init() {
         preferences.applyAppearance()
         shortcut.action = { [weak self] in self?.beginCapture() }
@@ -86,30 +86,41 @@ import Combine
 @MainActor final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
     private var model: AppModel!
+    private var languageSubscription: AnyCancellable?
     func applicationDidFinishLaunching(_ notification: Notification) {
         model = AppModel()
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         statusItem.button?.image = NSImage(systemSymbolName: "viewfinder", accessibilityDescription: "ScreenGPT")
         statusItem.button?.image?.isTemplate = true
+        rebuildMenus()
+        languageSubscription = model.preferences.$interfaceLanguage.dropFirst().receive(on: RunLoop.main).sink { [weak self] _ in
+            Task { @MainActor in self?.rebuildMenus() }
+        }
+        model.showSettings()
+        if CommandLine.arguments.contains("--preview") { model.beginCapture(preview: true) }
+    }
+    private func rebuildMenus() {
         let menu = NSMenu()
-        add("框选屏幕", action: #selector(capture), to: menu)
+        add(L("框选屏幕", "Capture Screen"), action: #selector(capture), to: menu)
         menu.addItem(.separator())
-        add("设置…", action: #selector(settings), key: ",", to: menu)
-        add("已保存", action: #selector(history), to: menu)
+        add(L("设置…", "Settings…"), action: #selector(settings), key: ",", to: menu)
+        add(L("已保存", "Saved"), action: #selector(history), to: menu)
         menu.addItem(.separator())
-        add("退出 ScreenGPT", action: #selector(quit), key: "q", to: menu)
+        add(L("退出 ScreenGPT", "Quit ScreenGPT"), action: #selector(quit), key: "q", to: menu)
         statusItem.menu = menu
         let mainMenu = NSMenu(), appMenu = NSMenu()
         let appItem = NSMenuItem(); appItem.submenu = appMenu; mainMenu.addItem(appItem)
-        add("关于 ScreenGPT", action: #selector(about), to: appMenu)
-        add("设置…", action: #selector(settings), key: ",", to: appMenu)
-        appMenu.addItem(.separator()); add("退出 ScreenGPT", action: #selector(quit), key: "q", to: appMenu)
-        let edit = NSMenu(title: "编辑"), editItem = NSMenuItem(title: "编辑", action: nil, keyEquivalent: "")
+        add(L("关于 ScreenGPT", "About ScreenGPT"), action: #selector(about), to: appMenu)
+        add(L("设置…", "Settings…"), action: #selector(settings), key: ",", to: appMenu)
+        appMenu.addItem(.separator()); add(L("退出 ScreenGPT", "Quit ScreenGPT"), action: #selector(quit), key: "q", to: appMenu)
+        let editTitle = L("编辑", "Edit")
+        let edit = NSMenu(title: editTitle), editItem = NSMenuItem(title: editTitle, action: nil, keyEquivalent: "")
         editItem.submenu = edit; mainMenu.addItem(editItem)
-        for (name, action, key) in [("复制", "copy:", "c"), ("粘贴", "paste:", "v"), ("全选", "selectAll:", "a")] { edit.addItem(withTitle: name, action: Selector(action), keyEquivalent: key) }
+        for (name, action, key) in [(L("撤销", "Undo"), "undo:", "z"), (L("重做", "Redo"), "redo:", "z"), (L("剪切", "Cut"), "cut:", "x"), (L("复制", "Copy"), "copy:", "c"), (L("粘贴", "Paste"), "paste:", "v"), (L("全选", "Select All"), "selectAll:", "a")] {
+            let item = edit.addItem(withTitle: name, action: Selector(action), keyEquivalent: key)
+            if action == "redo:" { item.keyEquivalentModifierMask = [.command, .shift] }
+        }
         NSApp.mainMenu = mainMenu
-        model.showSettings()
-        if CommandLine.arguments.contains("--preview") { model.beginCapture(preview: true) }
     }
     private func add(_ title: String, action: Selector, key: String = "", to menu: NSMenu) { let item = NSMenuItem(title: title, action: action, keyEquivalent: key); item.target = self; menu.addItem(item) }
     @objc private func capture() { model.beginCapture() }

@@ -31,16 +31,16 @@ import Network
                 guard let self else { return }
                 switch value {
                 case .ready:
-                    guard let port = listener.port else { self.cancel(AppFailure("无法启动登录回调。")); return }
+                    guard let port = listener.port else { self.cancel(AppFailure(L("无法启动登录回调。", "Could not start the sign-in callback."))); return }
                     self.ready?.resume(returning: "http://127.0.0.1:\(port.rawValue)/auth/callback"); self.ready = nil
-                case .failed: self.cancel(AppFailure("无法启动本地登录服务。"))
+                case .failed: self.cancel(AppFailure(L("无法启动本地登录服务。", "Could not start the local sign-in service.")))
                 default: break
                 }
                 }
             }
             listener.start(queue: .main)
             timeout = Task { [weak self] in
-                do { try await Task.sleep(for: .seconds(180)); self?.cancel(AppFailure("登录已超时，请重试。")) } catch {}
+                do { try await Task.sleep(for: .seconds(180)); self?.cancel(AppFailure(L("登录已超时，请重试。", "Sign-in timed out. Try again."))) } catch {}
             }
         }
         }, onCancel: { Task { @MainActor [weak self] in self?.cancel() } })
@@ -75,9 +75,15 @@ import Network
                   let url = URL(string: "http://127.0.0.1" + parts[1]), let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
                   components.path == "/auth/callback", let items = components.queryItems,
                   items.filter({ $0.name == "state" }).count == 1, items.first(where: { $0.name == "state" })?.value == self.state else {
-                self.respond(connection, status: "400 Bad Request", body: "Invalid callback."); return
+                let language = AppLocalization.language
+                let message = L("登录回调无效。请回到应用重试。", "The sign-in callback is invalid. Return to the app and try again.")
+                self.respond(connection, status: "400 Bad Request", body: "<!doctype html><html lang=\"\(language.rawValue)\"><meta charset=utf-8><title>ScreenGPT</title><p>\(message)</p></html>"); return
             }
-            self.respond(connection, status: "200 OK", body: "<!doctype html><meta charset=utf-8><title>ScreenGPT</title><style>body{font:18px system-ui;padding:12vh 8vw;color:#163d3c;background:#f3f8f7}h1{font-size:32px}</style><h1>返回 ScreenGPT</h1><p>授权结果已收到。请回到应用查看登录状态。</p>")
+            let language = AppLocalization.language
+            let pageTitle = L("返回 ScreenGPT", "Return to ScreenGPT")
+            let pageMessage = L("授权结果已收到。请回到应用查看登录状态。", "Authorization received. Return to the app to check your sign-in status.")
+            let body = "<!doctype html><html lang=\"\(language.rawValue)\"><meta charset=utf-8><title>ScreenGPT</title><style>body{font:18px system-ui;padding:12vh 8vw;color:#163d3c;background:#f3f8f7}h1{font-size:32px}</style><h1>\(pageTitle)</h1><p>\(pageMessage)</p></html>"
+            self.respond(connection, status: "200 OK", body: body)
             self.connections.filter { $0 !== connection }.forEach { $0.cancel() }
             self.connections = [connection]
             self.complete(.success(url))

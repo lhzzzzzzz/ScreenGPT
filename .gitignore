@@ -1,5 +1,6 @@
 .build/
 dist/
+backups/
 .DS_Store
 .swiftpm/
 *.dylib

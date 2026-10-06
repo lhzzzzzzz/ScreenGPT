@@ -48,15 +48,34 @@ public struct ModelConfiguration: Codable, Equatable, Sendable {
 public struct InferencePreferences: Codable, Equatable, Sendable {
     public var solve: ModelConfiguration
     public var translate: ModelConfiguration
+    public var ask: ModelConfiguration
 
     public init(legacyModel: String = "") {
         solve = ModelConfiguration(model: legacyModel)
         translate = ModelConfiguration(model: legacyModel)
+        ask = ModelConfiguration(model: legacyModel)
     }
 
-    public init(solve: ModelConfiguration, translate: ModelConfiguration) {
+    public init(solve: ModelConfiguration, translate: ModelConfiguration, ask: ModelConfiguration? = nil) {
         self.solve = solve
         self.translate = translate
+        self.ask = ask ?? solve
+    }
+
+    private enum CodingKeys: String, CodingKey { case solve, translate, ask }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        solve = try container.decode(ModelConfiguration.self, forKey: .solve)
+        translate = try container.decode(ModelConfiguration.self, forKey: .translate)
+        ask = try container.decodeIfPresent(ModelConfiguration.self, forKey: .ask) ?? solve
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(solve, forKey: .solve)
+        try container.encode(translate, forKey: .translate)
+        try container.encode(ask, forKey: .ask)
     }
 }
 

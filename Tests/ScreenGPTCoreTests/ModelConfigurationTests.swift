@@ -2,16 +2,20 @@ import Foundation
 import Testing
 @testable import ScreenGPTCore
 
-@Test func solveAndTranslateConfigurationsAreIndependentAndCodable() throws {
+@Test func solveTranslateAndAskConfigurationsAreIndependentAndCodable() throws {
     var preferences = InferencePreferences(legacyModel: "gpt-6-astra")
     preferences.solve.effort = .high
     preferences.translate.model = "gpt-6-luna"
     preferences.translate.effort = .low
+    preferences.ask.model = "gpt-6-sol"
+    preferences.ask.effort = .medium
 
     #expect(preferences.solve.model == "gpt-6-astra")
     #expect(preferences.solve.effort == .high)
     #expect(preferences.translate.model == "gpt-6-luna")
     #expect(preferences.translate.effort == .low)
+    #expect(preferences.ask.model == "gpt-6-sol")
+    #expect(preferences.ask.effort == .medium)
 
     let encoded = try JSONEncoder().encode(preferences)
     let decoded = try JSONDecoder().decode(InferencePreferences.self, from: encoded)
@@ -22,6 +26,30 @@ import Testing
     let preferences = InferencePreferences(legacyModel: "legacy-model")
     #expect(preferences.solve == ModelConfiguration(model: "legacy-model"))
     #expect(preferences.translate == ModelConfiguration(model: "legacy-model"))
+    #expect(preferences.ask == ModelConfiguration(model: "legacy-model"))
+}
+
+@Test func olderTwoPurposeJSONPreservesChoicesAndDefaultsAskToSolve() throws {
+    let json = #"{"solve":{"model":"solve-model","effort":"high"},"translate":{"model":"translate-model","effort":"low"}}"#
+    let preferences = try JSONDecoder().decode(InferencePreferences.self, from: Data(json.utf8))
+
+    #expect(preferences.solve == ModelConfiguration(model: "solve-model", effort: .high))
+    #expect(preferences.translate == ModelConfiguration(model: "translate-model", effort: .low))
+    #expect(preferences.ask == preferences.solve)
+}
+
+@Test func explicitThreePurposeConfigurationsRemainDistinct() throws {
+    let preferences = InferencePreferences(
+        solve: ModelConfiguration(model: "solve-model", effort: .high),
+        translate: ModelConfiguration(model: "translate-model", effort: .low),
+        ask: ModelConfiguration(model: "ask-model", effort: .medium)
+    )
+    let encoded = try JSONEncoder().encode(preferences)
+    let decoded = try JSONDecoder().decode(InferencePreferences.self, from: encoded)
+
+    #expect(decoded.solve == ModelConfiguration(model: "solve-model", effort: .high))
+    #expect(decoded.translate == ModelConfiguration(model: "translate-model", effort: .low))
+    #expect(decoded.ask == ModelConfiguration(model: "ask-model", effort: .medium))
 }
 
 @Test func missingAndUnknownEffortDecodeAsAutomaticAndPreserveModel() throws {

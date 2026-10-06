@@ -118,6 +118,8 @@ public struct SSEDecoder {
 public struct ResponseAccumulator {
     public private(set) var text = ""
     public private(set) var completed = false
+    /// Retained in memory for manual continuation; never rendered or logged.
+    public private(set) var outputItems: Data?
     private var streamedTextKeys: Set<String> = []
     private var finishedTextKeys: Set<String> = []
 
@@ -156,6 +158,9 @@ public struct ResponseAccumulator {
             let response = event["response"] as? [String: Any] ?? [:]
             if let status = response["status"] as? String, status != "completed" {
                 throw AIStreamError(code: "response_not_completed", message: "The response ended with status \(status).")
+            }
+            if let output = response["output"] as? [[String: Any]] {
+                outputItems = try JSONSerialization.data(withJSONObject: output)
             }
             if let authoritative = Self.outputText(in: response) {
                 let previousText = text

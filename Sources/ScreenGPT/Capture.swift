@@ -3,83 +3,6 @@ import SwiftUI
 import ScreenCaptureKit
 import ScreenGPTCore
 
-@MainActor final class CaptureSession: ObservableObject {
-    @Published var action: CaptureAction = .translate
-    @Published var source: Language
-    @Published var target: Language
-    @Published var answer = ""
-    @Published var working = false
-    @Published var error: String?
-    @Published var saved = false
-    @Published var hasResult = false
-    private(set) var image: Data?
-    private var task: Task<Void, Never>?
-    private var requestID = UUID()
-    private var entryID = UUID()
-    private var answeredSource: Language?
-    private var answeredTarget: Language?
-    private let preferences: Preferences
-    private let account: ChatGPTAccount
-    private let history: HistoryStore
-    var reveal: (() -> Void)?
-    var close: (() -> Void)?
-    var reselect: (() -> Void)?
-    var settings: (() -> Void)?
-    var move: ((CGSize, Bool) -> Void)?
-    var preview = false
-    init(preferences: Preferences, account: ChatGPTAccount, history: HistoryStore) {
-        self.preferences = preferences; self.account = account; self.history = history
-        source = preferences.source; target = preferences.target
-    }
-    func select(image: Data) { reset(); self.image = image }
-    func reset() { cancel(silent: true); image = nil; answer = ""; error = nil; hasResult = false; saved = false; answeredSource = nil; answeredTarget = nil; entryID = UUID() }
-    func cancel(silent: Bool = false) {
-        requestID = UUID(); task?.cancel(); task = nil; working = false
-        if !silent { error = "已停止。你可以重新生成回答。" }
-    }
-    func run(_ action: CaptureAction) {
-        guard let image else { return }
-        cancel(silent: true); self.action = action; hasResult = true; saved = false; answer = ""; error = nil; working = true; entryID = UUID()
-        reveal?()
-        let id = requestID, source = source, target = target
-        let configuration = preferences.configuration(for: action)
-        answeredSource = source; answeredTarget = target
-        if preview {
-            working = false
-            answer = action == .translate ? "**阅读图形，理解关系**\n\n直角三角形的两条直角边分别为 3 和 4。求斜边的长度。\n\n*界面预览示例，未调用模型。*" : "**答案：5**\n\n根据勾股定理：\n\nc² = 3² + 4² = 9 + 16 = 25\n\nc = √25 = **5**\n\n*界面预览示例，未调用模型。*"
-            return
-        }
-        task = Task { [weak self] in
-            guard let self else { return }
-            do {
-                guard account.active?.connected == true else { throw AppFailure("先登录 ChatGPT，即可用套餐额度处理截图。") }
-                if account.models.isEmpty { await account.loadModels() }
-                try Task.checkCancellation()
-                guard requestID == id else { return }
-                guard let model = configuration.model.isEmpty ? account.models.first : account.models.first(where: { $0.slug == configuration.model }) else {
-                    throw AppFailure("\(action.title)所选的模型当前不可用，请在账号设置中重新选择。")
-                }
-                let result = try await AIClient(account: account).answer(image: image, action: action, source: source, target: target, model: model, effort: configuration.effort) { [weak self] text in
-                    guard let self, self.requestID == id else { return }; self.answer = text
-                }
-                guard requestID == id else { return }
-                answer = result; working = false
-                if preferences.automaticallySave { save(source: source, target: target) }
-            } catch {
-                guard requestID == id else { return }
-                working = false
-                if !(error is CancellationError) { self.error = error.localizedDescription }
-            }
-        }
-    }
-    func save(source: Language? = nil, target: Language? = nil) {
-        guard let image, !working, !answer.isEmpty, error == nil, !preview else { return }
-        do {
-            try history.save(HistoryEntry(id: entryID, action: action, source: source ?? answeredSource ?? self.source, target: target ?? answeredTarget ?? self.target, answer: answer, image: image)); saved = true
-        } catch { self.error = "保存失败：\(error.localizedDescription)" }
-    }
-}
-
 @MainActor final class CaptureCoordinator {
     private var panels: [CapturePanel] = []
     private var session: CaptureSession?
@@ -105,13 +28,14 @@ import ScreenGPTCore
     }
     func capture(preview: Bool = false) async {
         if isActive { close(); return }
-        if !preview && !CGPreflightScreenCaptureAccess() { reportError?("请先允许屏幕录制。ScreenGPT 只在你按下快捷键时截图。"); showSettings?(); return }
+        if !preview && !CGPreflightScreenCaptureAccess() { reportError?(L("请先允许屏幕录制。ScreenGPT 只在你按下快捷键时截图。", "Allow screen recording first. ScreenGPT captures only when you start a selection.")); showSettings?(); return }
         capturing = true; let version = UUID(); generation = version
         do {
             let frames: [(CGRect, CGImage)]
             if preview, let screen = NSScreen.main { frames = [(screen.frame, PreviewDocument.image(size: screen.frame.size))] }
             else {
                 let content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
+                let ownApplications = content.applications.filter { $0.processID == ProcessInfo.processInfo.processIdentifier }
                 let tasks = NSScreen.screens.compactMap { screen -> Task<(CGRect, CGImage), Error>? in
                     guard let number = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber,
                           let display = content.displays.first(where: { $0.displayID == number.uint32Value }) else { return nil }
@@ -121,7 +45,8 @@ import ScreenGPTCore
                         config.width = Int(frame.width * scale)
                         config.height = Int(frame.height * scale)
                         config.showsCursor = false; config.capturesAudio = false
-                        let filter = SCContentFilter(display: display, excludingWindows: [])
+                        // The compositor may still retain a just-hidden settings window.
+                        let filter = SCContentFilter(display: display, excludingApplications: ownApplications, exceptingWindows: [])
                         let image = try await SCScreenshotManager.captureImage(contentFilter: filter, configuration: config)
                         return (frame, image)
                     }
@@ -132,11 +57,15 @@ import ScreenGPTCore
                 frames = results
             }
             guard generation == version else { return }
-            guard !frames.isEmpty else { throw AppFailure("没有找到可截取的显示器。") }
+            guard !frames.isEmpty else { throw AppFailure(L("没有找到可截取的显示器。", "No display is available to capture.")) }
             let session = CaptureSession(preferences: preferences, account: account, history: history)
             self.session = session; session.preview = preview
             session.close = { [weak self] in self?.close() }
             session.settings = { [weak self] in self?.close(); self?.showSettings?() }
+            session.reselect = { [weak self, weak session] in
+                session?.reset(); session?.selectionLocked = false
+                self?.panels.compactMap { $0.contentView as? CaptureCanvas }.forEach { $0.clearSelection() }
+            }
             for (frame, image) in frames {
                 let panel = CapturePanel(contentRect: frame, styleMask: [.borderless], backing: .buffered, defer: false)
                 // Keep the capture above applications while allowing native language menus above it.
@@ -149,6 +78,9 @@ import ScreenGPTCore
                 canvas.onSelect = { [weak self, weak canvas] in
                     guard let self, let canvas else { return }
                     self.panels.compactMap { $0.contentView as? CaptureCanvas }.filter { $0 !== canvas }.forEach { $0.clearSelection() }
+                    self.panels.forEach { panel in
+                        if let view = panel.contentView { panel.invalidateCursorRects(for: view) }
+                    }
                 }
                 panel.contentView = canvas; panel.onEscape = { [weak self] in self?.close() }
                 panels.append(panel)
@@ -160,7 +92,7 @@ import ScreenGPTCore
             capturing = false
         } catch {
             guard generation == version else { return }
-            close(); reportError?("无法截取屏幕：\(error.localizedDescription)"); showSettings?()
+            close(); reportError?(L("无法截取屏幕：\(error.localizedDescription)", "Could not capture the screen: \(error.localizedDescription)")); showSettings?()
         }
     }
 }
@@ -181,7 +113,12 @@ final class CapturePanel: NSPanel {
     let dim: Double
     let glass: Bool
     var selection: CGRect?
-    var start: CGPoint?
+    private enum Gesture {
+        case create(CGPoint)
+        case edit(SelectionDrag, CGRect, CGPoint)
+    }
+    private var gesture: Gesture?
+    private var selectionChanged = false
     var onSelect: (() -> Void)?
     private var toolbar: NSHostingView<CaptureToolbar>?
     private var result: NSHostingView<AnswerPanel>?
@@ -191,11 +128,37 @@ final class CapturePanel: NSPanel {
     init(image: CGImage, session: CaptureSession, dim: Double, glass: Bool) {
         self.image = image; self.session = session; self.dim = dim; self.glass = glass
         super.init(frame: .zero)
-        setAccessibilityLabel("拖动鼠标框选，按 Escape 退出")
+        setAccessibilityLabel(L("拖动鼠标框选，按 Escape 退出", "Drag to select an area. Press Escape to close."))
     }
     required init?(coder: NSCoder) { fatalError() }
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+    override func hitTest(_ point: NSPoint) -> NSView? {
+        let local = convert(point, from: superview)
+        // Hosting views can have transparent padding. It must never fall through to the canvas.
+        let surfaces: [NSView?] = [dragHandle, result, toolbar]
+        for view in surfaces.compactMap({ $0 }) where !view.isHidden && view.frame.contains(local) {
+            return view.hitTest(local) ?? view
+        }
+        return super.hitTest(point)
+    }
     override func resetCursorRects() {
-        addCursorRect(bounds, cursor: .crosshair)
+        addCursorRect(bounds, cursor: session.selectionLocked ? .arrow : .crosshair)
+        if session.selectionLocked, let selection {
+            addCursorRect(selection, cursor: .openHand)
+            addCursorRect(CGRect(x: selection.minX - 8, y: selection.minY, width: 16, height: selection.height), cursor: .resizeLeftRight)
+            addCursorRect(CGRect(x: selection.maxX - 8, y: selection.minY, width: 16, height: selection.height), cursor: .resizeLeftRight)
+            addCursorRect(CGRect(x: selection.minX, y: selection.minY - 8, width: selection.width, height: 16), cursor: .resizeUpDown)
+            addCursorRect(CGRect(x: selection.minX, y: selection.maxY - 8, width: selection.width, height: 16), cursor: .resizeUpDown)
+            for (handle, point) in SelectionGeometry.handlePoints(for: selection) {
+                let cursor: NSCursor
+                switch handle {
+                case .top, .bottom: cursor = .resizeUpDown
+                case .left, .right: cursor = .resizeLeftRight
+                default: cursor = .crosshair
+                }
+                addCursorRect(CGRect(x: point.x - 8, y: point.y - 8, width: 16, height: 16), cursor: cursor)
+            }
+        }
         if let toolbar { addCursorRect(toolbar.frame, cursor: .arrow) }
         if let result { addCursorRect(result.frame, cursor: .arrow) }
         if let dragHandle { addCursorRect(dragHandle.frame, cursor: .openHand) }
@@ -209,11 +172,11 @@ final class CapturePanel: NSPanel {
         if let rect = selection {
             NSColor.white.withAlphaComponent(0.9).setStroke()
             let border = NSBezierPath(rect: rect.insetBy(dx: -0.5, dy: -0.5)); border.lineWidth = 1; border.stroke()
-            for point in [CGPoint(x: rect.minX, y: rect.minY), CGPoint(x: rect.maxX, y: rect.minY), CGPoint(x: rect.minX, y: rect.maxY), CGPoint(x: rect.maxX, y: rect.maxY)] {
+            for (_, point) in SelectionGeometry.handlePoints(for: rect) {
                 NSColor.white.setFill(); NSBezierPath(roundedRect: CGRect(x: point.x - 3, y: point.y - 3, width: 6, height: 6), xRadius: 1.5, yRadius: 1.5).fill()
             }
-        } else {
-            let text = session.preview ? "界面预览 · 拖动框选 · Esc 退出" : "拖动框选 · Esc 退出"
+        } else if !session.selectionLocked {
+            let text = session.preview ? L("界面预览 · 拖动框选 · Esc 退出", "Preview · Drag to select · Esc to close") : L("拖动框选 · Esc 退出", "Drag to select · Esc to close")
             let attrs: [NSAttributedString.Key: Any] = [.font: NSFont.systemFont(ofSize: 14, weight: .medium), .foregroundColor: NSColor.white]
             let size = (text as NSString).size(withAttributes: attrs)
             let pill = CGRect(x: (bounds.width - size.width) / 2 - 22, y: 42, width: size.width + 44, height: 42)
@@ -222,39 +185,74 @@ final class CapturePanel: NSPanel {
         }
     }
     override func mouseDown(with event: NSEvent) {
+        let point = clamped(convert(event.locationInWindow, from: nil))
+        let surfaces: [NSView?] = [toolbar, result]
+        guard !surfaces.compactMap({ $0 }).contains(where: { !$0.isHidden && $0.frame.contains(point) }) else { return }
         window?.makeKey(); window?.makeFirstResponder(self)
-        onSelect?(); session.reset(); clearSelection()
-        start = clamped(convert(event.locationInWindow, from: nil)); selection = CGRect(origin: start!, size: .zero); needsDisplay = true
+        selectionChanged = false
+        if session.selectionLocked {
+            guard let selection, let drag = SelectionGeometry.hitTest(point, selection: selection) else { return }
+            gesture = .edit(drag, selection, point)
+        } else {
+            session.reset(); clearSelection()
+            gesture = .create(point); selection = CGRect(origin: point, size: .zero)
+            needsDisplay = true
+        }
     }
     override func mouseDragged(with event: NSEvent) { updateSelection(event) }
     override func mouseUp(with event: NSEvent) {
-        updateSelection(event); start = nil
-        guard let selection, selection.width >= 12, selection.height >= 12 else { clearSelection(); return }
+        guard let gesture else { return }
+        updateSelection(event); self.gesture = nil
+        if case .edit = gesture, !selectionChanged { return }
+        guard let selection, selection.width >= 12, selection.height >= 12 else {
+            if session.selectionLocked { session.reselect?() } else { clearSelection() }
+            return
+        }
         let rect = OverlayLayout.cropRect(selection: selection, viewSize: bounds.size, pixelSize: CGSize(width: image.width, height: image.height))
-        guard let crop = image.cropping(to: rect), let png = NSBitmapImageRep(cgImage: crop).representation(using: .png, properties: [:]) else { clearSelection(); return }
+        guard let crop = image.cropping(to: rect), let png = NSBitmapImageRep(cgImage: crop).representation(using: .png, properties: [:]) else { session.reselect?(); return }
         session.select(image: png)
+        session.selectionLocked = true; onSelect?()
         session.reveal = { [weak self] in self?.showResult() }
-        session.reselect = { [weak self] in self?.session.reset(); self?.clearSelection() }
         session.move = { [weak self] offset, finished in self?.moveResult(offset, finished: finished) }
-        let toolbar = NSHostingView(rootView: CaptureToolbar(session: session, glass: glass))
-        self.toolbar = toolbar; addSubview(toolbar)
+        if toolbar == nil {
+            let toolbar = CaptureHostingView(rootView: CaptureToolbar(session: session, glass: glass))
+            self.toolbar = toolbar; addSubview(toolbar)
+        }
+        toolbar?.isHidden = false
+        setAccessibilityLabel(L("已框选；拖动内部移动，拖动边缘或角点调整大小；点击重新框选重画；Escape 退出", "Selected. Drag inside to move; drag an edge or corner to resize. Choose Reselect to draw again. Escape to close."))
         arrange(); needsDisplay = true
     }
     private func updateSelection(_ event: NSEvent) {
-        guard let start else { return }
+        guard let gesture else { return }
         let point = clamped(convert(event.locationInWindow, from: nil))
-        selection = CGRect(x: min(start.x, point.x), y: min(start.y, point.y), width: abs(start.x - point.x), height: abs(start.y - point.y))
+        switch gesture {
+        case .create(let start):
+            selection = CGRect(x: min(start.x, point.x), y: min(start.y, point.y), width: abs(start.x - point.x), height: abs(start.y - point.y))
+        case .edit(let drag, let original, let start):
+            let offset = CGSize(width: point.x - start.x, height: point.y - start.y)
+            guard selectionChanged || abs(offset.width) >= 2 || abs(offset.height) >= 2 else { return }
+            let updated = SelectionGeometry.applying(drag, to: original, translation: offset, in: bounds)
+            guard updated != selection else { return }
+            if !selectionChanged {
+                session.reset(); clearResult(); toolbar?.isHidden = true; selectionChanged = true
+            }
+            selection = updated
+        }
         needsDisplay = true
     }
     func clearSelection() {
-        selection = nil; start = nil; toolbar?.removeFromSuperview(); toolbar = nil
+        selection = nil; gesture = nil; selectionChanged = false; toolbar?.removeFromSuperview(); toolbar = nil
+        clearResult(); needsDisplay = true
+        setAccessibilityLabel(session.selectionLocked ? L("已在另一显示器框选", "An area is selected on another display.") : L("拖动鼠标框选，按 Escape 退出", "Drag to select an area. Press Escape to close."))
+        window?.invalidateCursorRects(for: self)
+    }
+    private func clearResult() {
         result?.removeFromSuperview(); result = nil; resultOrigin = nil; dragOrigin = nil; needsDisplay = true
         dragHandle?.removeFromSuperview(); dragHandle = nil
-        window?.invalidateCursorRects(for: self)
     }
     private func showResult() {
         if result == nil {
-            let host = NSHostingView(rootView: AnswerPanel(session: session, glass: glass)); result = host; addSubview(host)
+            let host = CaptureHostingView(rootView: AnswerPanel(session: session, glass: glass)); result = host; addSubview(host)
             let handle = PanelDragHandle(); handle.move = { [weak self] in self?.moveResult($0, finished: $1) }
             dragHandle = handle; addSubview(handle)
         }
@@ -262,9 +260,13 @@ final class CapturePanel: NSPanel {
     }
     private func arrange() {
         guard let selection else { return }
-        let layout = OverlayLayout.arrange(selection: selection, bounds: bounds, resultSize: CGSize(width: 372, height: 436), toolbarSize: CGSize(width: 376, height: 52))
+        let layout = OverlayLayout.arrange(selection: selection, bounds: bounds, resultSize: CGSize(width: 392, height: session.composerExpanded ? 552 : 436), toolbarSize: CGSize(width: 540, height: 52))
         toolbar?.frame = layout.toolbar
-        result?.frame = CGRect(origin: resultOrigin ?? layout.result.origin, size: layout.result.size)
+        var origin = resultOrigin ?? layout.result.origin
+        origin.x = min(max(12, origin.x), max(12, bounds.width - layout.result.width - 12))
+        origin.y = min(max(12, origin.y), max(12, bounds.height - layout.result.height - 12))
+        result?.frame = CGRect(origin: origin, size: layout.result.size)
+        if resultOrigin != nil { resultOrigin = origin }
         updateDragHandle()
         window?.invalidateCursorRects(for: self)
     }
@@ -279,6 +281,12 @@ final class CapturePanel: NSPanel {
         if let result { dragHandle?.frame = CGRect(x: result.frame.minX, y: result.frame.minY, width: result.frame.width, height: 51) }
     }
     private func clamped(_ point: CGPoint) -> CGPoint { CGPoint(x: min(max(0, point.x), bounds.width), y: min(max(0, point.y), bounds.height)) }
+}
+
+// Accept the first click even when another application was previously active.
+// The canvas hit-test and mouseDown guard protect the surface's padding.
+final class CaptureHostingView<Content: View>: NSHostingView<Content> {
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
 }
 
 final class PanelDragHandle: NSView {
