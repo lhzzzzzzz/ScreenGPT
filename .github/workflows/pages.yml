@@ -6,6 +6,7 @@ on:
     paths:
       - 'website/**'
       - '.github/workflows/pages.yml'
+      - 'scripts/test-website-language.cjs'
   workflow_dispatch:
 
 permissions:
@@ -29,6 +30,8 @@ jobs:
     steps:
       - name: Check out website
         uses: actions/checkout@v6
+      - name: Check website language selection
+        run: node --test scripts/test-website-language.cjs
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload static website

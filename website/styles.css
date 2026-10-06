@@ -34,6 +34,12 @@ h1, h2, h3 { line-height: 1.35; }
 .brand img { flex: 0 0 auto; }
 nav { display: flex; gap: 30px; font-size: 14px; font-weight: 500; }
 nav a { text-decoration: none; padding-block: 10px; }
+.header-actions { display: flex; align-items: center; gap: 30px; }
+.language-switch { align-items: center; gap: 9px; padding-left: 24px; border-left: 1px solid var(--line); white-space: nowrap; }
+.language-switch span { color: var(--muted); }
+.language-switch a { min-height: 44px; display: inline-flex; align-items: center; }
+.language-switch a[aria-current="true"] { color: var(--accent); text-decoration: underline; text-decoration-thickness: 2px; font-weight: 650; }
+html[lang="en"] h1 { font-size: clamp(40px, 4.2vw, 58px); }
 .hero { display: grid; grid-template-columns: .78fr 1.22fr; align-items: center; gap: 50px; padding-block: 70px 52px; }
 .eyebrow { font-size: 13px; font-weight: 600; color: var(--accent); margin-bottom: 22px; letter-spacing: .05em; }
 h1 { font-size: clamp(40px, 4.5vw, 62px); line-height: 1.2; font-weight: 650; letter-spacing: -.045em; }
@@ -121,11 +127,9 @@ summary:hover { color: var(--accent); }
 }
 @media (max-width: 767px) {
   .shell { width: calc(100% - 40px); }
-  .site-header { height: 76px; }
   .brand { font-size: 18px; gap: 6px; }
   .brand img { width: 34px; height: 34px; }
   nav { gap: 20px; font-size: 13px; }
-  .faq-nav { display: none; }
   .hero { grid-template-columns: 1fr; gap: 38px; padding-block: 36px 28px; }
   h1 { font-size: clamp(40px, 8.5vw, 56px); }
   .eyebrow { margin-bottom: 18px; }
@@ -154,6 +158,12 @@ summary:hover { color: var(--accent); }
   .faq { padding-bottom: 60px; }
   summary { font-size: 15px; padding-block: 20px; }
   .site-footer { align-items: start; flex-direction: column; gap: 22px; }
+  .site-header { display: grid; grid-template-columns: 1fr auto; height: auto; gap: 2px 16px; padding-block: 12px; }
+  .header-actions { display: contents; }
+  .header-actions > nav:not(.language-switch) { grid-column: 1 / -1; grid-row: 2; gap: 24px; }
+  .faq-nav { display: inline; }
+  .language-switch { grid-column: 2; grid-row: 1; padding-left: 0; border-left: 0; gap: 8px; }
+  html[lang="en"] h1 { font-size: clamp(40px, 8.5vw, 56px); }
 }
 @media (max-width: 374px) {
   nav { gap: 12px; }

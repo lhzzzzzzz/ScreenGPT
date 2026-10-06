@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="../language.js"></script>
+    <meta name="google-site-verification" content="sj40CnKtkLSSpTTdSo5fmWsCSzqVY8ebqkyJbFDssyk">
+    <meta name="color-scheme" content="light dark">
+    <meta name="theme-color" content="#f7f9f9" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#111919" media="(prefers-color-scheme: dark)">
+    <title>ScreenGPT · Screen translation and problem-solving assistant for Mac</title>
+    <meta name="description" content="ScreenGPT is a free, open-source macOS menu bar app. Press a shortcut, select an area of your screen, and use ChatGPT to translate English or work through a problem. See the answer right where you need it.">
+    <link rel="canonical" href="https://lhzzzzzzz.github.io/ScreenGPT/en/">
+    <link rel="alternate" hreflang="zh-Hans" href="https://lhzzzzzzz.github.io/ScreenGPT/zh/">
+    <link rel="alternate" hreflang="en" href="https://lhzzzzzzz.github.io/ScreenGPT/en/">
+    <link rel="alternate" hreflang="x-default" href="https://lhzzzzzzz.github.io/ScreenGPT/">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:locale:alternate" content="zh_CN">
+    <meta property="og:title" content="ScreenGPT · Select it. Understand it.">
+    <meta property="og:description" content="Select a small area of your screen and ask ChatGPT to translate it or help solve a problem. A free, open-source Mac menu bar assistant.">
+    <meta property="og:url" content="https://lhzzzzzzz.github.io/ScreenGPT/en/">
+    <link rel="icon" type="image/png" href="../assets/icon-32.png" sizes="32x32">
+    <link rel="apple-touch-icon" href="../assets/icon-256.png">
+    <link rel="stylesheet" href="../styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header shell">
+      <a class="brand" href="./" aria-label="ScreenGPT home">
+        <img src="../assets/icon-256.png" width="40" height="40" alt="">
+        <span>ScreenGPT</span>
+      </a>
+      <div class="header-actions">
+        <nav aria-label="Main navigation">
+          <a class="install-nav" href="#install">Installation</a>
+          <a class="faq-nav" href="#faq">FAQ</a>
+          <a class="github-nav" href="https://github.com/lhzzzzzzz/ScreenGPT">GitHub <span aria-hidden="true">↗</span></a>
+        </nav>
+        <nav class="language-switch" aria-label="Website language">
+          <a href="../zh/" data-language="zh" lang="zh-CN" hreflang="zh-Hans">中文</a>
+          <span aria-hidden="true">/</span>
+          <a href="./" data-language="en" lang="en" hreflang="en" aria-current="true">English</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero shell" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow">Made for macOS · Free and open source</p>
+          <h1 id="hero-title">Select it.<br><span>Understand it.</span></h1>
+          <p class="hero-description">Select text or a problem. Let ChatGPT translate or explain it, with the answer right beside your selection.</p>
+          <div class="hero-actions">
+            <a class="button" href="https://github.com/lhzzzzzzz/ScreenGPT/releases/download/v0.1.1/ScreenGPT-macOS.dmg" aria-describedby="download-note">Download the Mac beta <span aria-hidden="true">↓</span></a>
+            <a class="text-link" href="#install">How to install <span aria-hidden="true">↗</span></a>
+          </div>
+        </div>
+        <figure class="product-preview">
+          <a href="../assets/preview.png" aria-label="View the full ScreenGPT interface preview">
+            <img src="../assets/preview.png" width="2880" height="1800" fetchpriority="high" alt="ScreenGPT selects an English problem; Solve and Translate buttons appear below the selection, and a floating window on the right shows the Chinese translation.">
+          </a>
+          <figcaption>Preview of the app interface, shown in Chinese with fixed example content. No live model request was made.</figcaption>
+        </figure>
+      </section>
+
+      <div class="release-note shell" id="download-note">
+        <p><strong>Public beta v0.1.1</strong><span>macOS 14 or later; includes Apple silicon and Intel builds. Intel has not yet been tested on a physical Mac.</span></p>
+        <p>An internet connection and a ChatGPT account with the required access are needed. The installer has not yet been notarized by Apple, so macOS may block it the first time you open it. See the <a href="#first-open">installation note</a>.</p>
+      </div>
+
+      <section class="use-cases shell" aria-label="Use cases">
+        <article>
+          <h2>See something you don’t understand? Select it.</h2>
+          <p>Read English material, review course slides, or look at text in an image. Choose “Translate” (<span lang="zh-CN">“翻译”</span>) and keep reading in the floating window.</p>
+        </article>
+        <article>
+          <h2>Stuck on a problem? Work through it.</h2>
+          <p>Select the problem statement and diagram together, then choose “Solve” (<span lang="zh-CN">“做题”</span>) and ask ChatGPT to help you understand the problem. Always check AI responses.</p>
+        </article>
+      </section>
+
+      <section class="workflow shell" aria-labelledby="workflow-title">
+        <div>
+          <h2 id="workflow-title">As simple as a screenshot.</h2>
+          <p>Stay with what you’re looking at and avoid switching apps.</p>
+        </div>
+        <ol class="workflow-steps">
+          <li><span class="shortcut" aria-label="Command Shift D"><kbd>⌘</kbd><kbd>⇧</kbd><kbd>D</kbd></span><span>Press the shortcut</span></li>
+          <li><strong>Select</strong><span>Choose an area</span></li>
+          <li><strong>Translate / Solve</strong><span>See the answer</span></li>
+        </ol>
+      </section>
+
+      <section class="installation shell section" id="install" aria-labelledby="install-title">
+        <div class="section-heading">
+          <h2 id="install-title">Get started on your Mac.</h2>
+          <p>After installation, grant Screen Recording permission and sign in to ChatGPT.</p>
+        </div>
+        <div class="install-layout">
+          <ol class="install-steps">
+            <li><div><h3>Move it to Applications</h3><p>Open the downloaded DMG, drag ScreenGPT into the Applications folder, then launch the app.</p></div></li>
+            <li><div><h3>Allow screen recording</h3><p>In System Settings → Privacy &amp; Security → Screen Recording, allow ScreenGPT. After granting permission, follow the prompt to check again or restart the app.</p></div></li>
+            <li><div><h3>Connect your ChatGPT account</h3><p>Under “ChatGPT Account” (<span lang="zh-CN">“ChatGPT 账号”</span>), click “Continue with ChatGPT” and authorize in your browser. Then press <kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>D</kbd> to start selecting an area.</p></div></li>
+          </ol>
+          <aside class="install-help" id="first-open" aria-labelledby="first-open-title">
+            <p class="help-label">Beta installation note</p>
+            <h3 id="first-open-title">Seeing “Apple cannot verify the developer”?</h3>
+            <p>This version uses an ad hoc signature and has not been notarized by Apple. After confirming the installer came from this project and that you trust its source:</p>
+            <ol>
+              <li>Try opening ScreenGPT once.</li>
+              <li>Go to System Settings → Privacy &amp; Security.</li>
+              <li>Find the ScreenGPT notice, click “Open Anyway” (<span lang="zh-CN">“仍要打开”</span>), and confirm when prompted.</li>
+            </ol>
+            <p class="help-footnote">Allow this exception for this app only and keep macOS security checks enabled. Managed Macs may not allow this.</p>
+            <a class="text-link" href="https://support.apple.com/en-us/102445">Read Apple’s official instructions <span aria-hidden="true">↗</span></a>
+          </aside>
+        </div>
+      </section>
+
+      <section class="faq shell section" id="faq" aria-labelledby="faq-title">
+        <div class="section-heading">
+          <h2 id="faq-title">Before you download.</h2>
+        </div>
+        <div class="questions">
+          <details>
+            <summary>Is ScreenGPT free?</summary>
+            <div class="answer"><p>The app is free and open source under the MIT License. You need your own ChatGPT account to use models. OpenAI determines plan fees, model access, and usage limits; ScreenGPT does not provide additional model credits.</p></div>
+          </details>
+          <details>
+            <summary>Do I need an API key? Can I use any ChatGPT account?</summary>
+            <div class="answer"><p>No API key or Codex CLI installation is needed; sign in and authorize through your browser. Access to a selected model and plan limits depend on the access OpenAI grants to your account, workspace, and model. We can’t guarantee that every account will work.</p></div>
+          </details>
+          <details>
+            <summary>Does ScreenGPT send my whole screen?</summary>
+            <div class="answer"><p>Only after you explicitly click “Translate” (<span lang="zh-CN">“翻译”</span>) or “Solve” (<span lang="zh-CN">“做题”</span>) does the app send the selected cropped area to the model. The full-screen image is used locally to display the screen and let you select an area; it is not sent as part of the request. Sign-in credentials are stored in the macOS Keychain.</p><p>Automatic saving is off by default. Any records saved manually or automatically include the screenshot and answer and are stored locally. <a href="https://github.com/lhzzzzzzz/ScreenGPT/blob/main/docs/PRIVACY.md">Read the full privacy notice</a>.</p></div>
+          </details>
+          <details>
+            <summary>Which Macs are supported? What if I run into a problem?</summary>
+            <div class="answer"><p>macOS 14 or later is required. The installer includes Apple silicon and Intel builds; Intel has not yet been tested on a physical Mac. This is an early beta, and situations such as using multiple displays still need further testing.</p><p>You can <a href="https://github.com/lhzzzzzzz/ScreenGPT/issues">report a problem or share a suggestion</a>, or see the <a href="https://github.com/lhzzzzzzz/ScreenGPT/releases/tag/v0.1.1">release notes, ZIP installer, and checksum files</a>.</p></div>
+          </details>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer shell">
+      <div><a class="brand" href="./"><img src="../assets/icon-256.png" width="32" height="32" alt=""><span>ScreenGPT</span></a><p>An independent open-source project, not affiliated with OpenAI.</p></div>
+      <div class="footer-links"><a href="https://github.com/lhzzzzzzz/ScreenGPT/blob/main/LICENSE">MIT License</a><a href="https://github.com/lhzzzzzzz/ScreenGPT/issues">Feedback and suggestions <span aria-hidden="true">↗</span></a></div>
+    </footer>
+  </body>
+</html>
