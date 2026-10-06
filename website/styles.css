@@ -1,0 +1,164 @@
+/* Static, dependency-free landing page. Design variance 5, motion 2, density 3.
+   System type mirrors the native Mac app. Buttons use 12px corners; media 20px.
+   All content follows the system color scheme. */
+:root {
+  color-scheme: light dark;
+  --background: #f7f9f9;
+  --surface: #eef4f3;
+  --paper: #fcfdfd;
+  --text: #172d2e;
+  --muted: #536768;
+  --accent: #08777b;
+  --button: #08777b;
+  --button-text: #fcfdfd;
+  --line: #d4e0df;
+  --shadow: 0 22px 60px -28px rgb(20 70 71 / 30%);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+}
+* { box-sizing: border-box; }
+html { scroll-padding-top: 24px; }
+body { margin: 0; background: var(--background); color: var(--text); font-size: 16px; line-height: 1.75; }
+a { color: inherit; text-underline-offset: 4px; }
+a:hover { color: var(--accent); }
+a:focus-visible, summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 6px; border-radius: 4px; }
+img { display: block; max-width: 100%; height: auto; }
+h1, h2, h3, p, figure { margin: 0; }
+h1, h2, h3 { line-height: 1.35; }
+.shell { width: min(1200px, calc(100% - 96px)); margin-inline: auto; }
+.skip-link { position: absolute; top: -80px; left: 24px; padding: 8px 16px; background: var(--paper); z-index: 1; }
+.skip-link:focus { top: 8px; }
+.site-header { height: 88px; display: flex; justify-content: space-between; align-items: center; }
+.brand { display: inline-flex; gap: 9px; align-items: center; text-decoration: none; font-size: 20px; font-weight: 650; letter-spacing: -.6px; }
+.brand img { flex: 0 0 auto; }
+nav { display: flex; gap: 30px; font-size: 14px; font-weight: 500; }
+nav a { text-decoration: none; padding-block: 10px; }
+.hero { display: grid; grid-template-columns: .78fr 1.22fr; align-items: center; gap: 50px; padding-block: 70px 52px; }
+.eyebrow { font-size: 13px; font-weight: 600; color: var(--accent); margin-bottom: 22px; letter-spacing: .05em; }
+h1 { font-size: clamp(40px, 4.5vw, 62px); line-height: 1.2; font-weight: 650; letter-spacing: -.045em; }
+h1 span { color: var(--accent); }
+.hero-description { max-width: 28em; margin-top: 24px; font-size: 17px; line-height: 1.9; color: var(--muted); }
+.hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 22px; margin-top: 30px; }
+.button { display: inline-flex; align-items: center; justify-content: center; gap: 24px; min-height: 52px; padding: 12px 22px; background: var(--button); color: var(--button-text); border-radius: 12px; text-decoration: none; font-size: 15px; font-weight: 600; white-space: nowrap; }
+.button:hover { color: var(--button-text); filter: brightness(1.08); }
+.button:active { transform: translateY(1px); }
+.text-link { font-size: 14px; font-weight: 550; text-decoration: none; }
+.text-link:hover { text-decoration: underline; }
+.product-preview a { display: block; overflow: hidden; border-radius: 20px; border: 1px solid var(--line); box-shadow: var(--shadow); }
+.product-preview img { width: 100%; }
+figcaption { padding-top: 14px; font-size: 12px; color: var(--muted); text-align: right; }
+.release-note { padding-block: 21px 24px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+.release-note strong { color: var(--text); margin-right: 16px; font-weight: 600; }
+.release-note p + p { margin-top: 4px; }
+.release-note a { margin-left: 4px; }
+.use-cases { display: grid; grid-template-columns: 1fr 1fr; gap: 90px; padding-block: 58px 66px; }
+.use-cases article { max-width: 440px; }
+.use-cases h2 { font-size: 25px; font-weight: 600; letter-spacing: -.03em; }
+.use-cases p { color: var(--muted); margin-top: 16px; font-size: 15px; }
+.workflow { display: grid; grid-template-columns: .9fr 1.1fr; align-items: center; gap: 40px; background: var(--surface); border-radius: 20px; padding: 36px 40px; }
+.workflow h2 { font-size: 23px; font-weight: 600; letter-spacing: -.03em; }
+.workflow p { color: var(--muted); font-size: 14px; margin-top: 8px; }
+.workflow-steps { display: grid; grid-template-columns: 1.15fr .8fr 1fr; gap: 24px; list-style: none; padding: 0; margin: 0; }
+.workflow-steps li { display: flex; flex-direction: column; justify-content: center; gap: 9px; }
+.workflow-steps li > span:last-child { color: var(--muted); font-size: 12px; white-space: nowrap; }
+.workflow-steps strong { font-size: 16px; font-weight: 600; }
+.shortcut { display: flex; gap: 5px; }
+kbd { display: inline-block; min-width: 25px; background: var(--paper); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; padding: 1px 6px; font-family: inherit; font-size: 13px; line-height: 1.6; text-align: center; color: var(--text); }
+.section { padding-top: 96px; }
+.section-heading { max-width: 720px; margin-bottom: 40px; }
+.section-heading h2 { font-size: 32px; font-weight: 600; letter-spacing: -.035em; }
+.section-heading p { color: var(--muted); margin-top: 14px; font-size: 15px; }
+.install-layout { display: grid; grid-template-columns: 1.06fr .94fr; gap: 76px; align-items: start; }
+.install-steps { list-style: none; padding: 0; margin: 0; counter-reset: installation; }
+.install-steps > li { counter-increment: installation; display: flex; gap: 20px; padding-bottom: 28px; }
+.install-steps > li::before { content: counter(installation); display: flex; justify-content: center; align-items: center; width: 28px; height: 28px; flex: 0 0 28px; border: 1px solid var(--line); border-radius: 50%; font-size: 13px; color: var(--accent); font-weight: 600; }
+h3 { font-size: 18px; font-weight: 600; }
+.install-steps p { color: var(--muted); margin-top: 10px; font-size: 14px; line-height: 1.85; }
+.install-help { background: var(--surface); border-radius: 20px; padding: 28px 30px; scroll-margin-top: 24px; }
+.help-label { font-size: 12px; font-weight: 600; color: var(--accent); margin-bottom: 12px; }
+.install-help h3 { font-size: 20px; margin-bottom: 14px; }
+.install-help > p:not(.help-label) { font-size: 13px; color: var(--muted); }
+.install-help ol { margin: 16px 0; padding-left: 20px; font-size: 13px; }
+.install-help li { padding-left: 2px; margin-block: 7px; }
+.install-help .help-footnote { margin-bottom: 20px; }
+.faq { padding-bottom: 96px; }
+.questions { max-width: 900px; }
+details { border-bottom: 1px solid var(--line); }
+details:first-child { border-top: 1px solid var(--line); }
+summary { cursor: pointer; padding: 22px 28px 22px 0; font-size: 16px; font-weight: 550; position: relative; list-style: none; }
+summary::-webkit-details-marker { display: none; }
+summary::after { content: "+"; position: absolute; right: 0; top: 19px; color: var(--accent); font-size: 22px; font-weight: 400; }
+details[open] summary::after { content: "−"; }
+summary:hover { color: var(--accent); }
+.answer { max-width: 780px; padding: 0 28px 24px 0; color: var(--muted); font-size: 14px; }
+.answer p + p { margin-top: 10px; }
+.answer a { color: var(--accent); }
+.site-footer { border-top: 1px solid var(--line); padding-block: 30px 38px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.site-footer .brand { font-size: 17px; }
+.site-footer p { font-size: 12px; color: var(--muted); margin-top: 8px; }
+.footer-links { display: flex; gap: 24px; font-size: 13px; }
+.footer-links a { text-decoration: none; }
+
+@media (prefers-color-scheme: dark) {
+  :root { --background: #111919; --surface: #1b2b2b; --paper: #223434; --text: #edf5f4; --muted: #acbebe; --accent: #62cdca; --button: #62cdca; --button-text: #112b2c; --line: #304444; --shadow: 0 22px 60px -28px rgb(0 10 10 / 65%); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  a, summary { transition: color 150ms ease; }
+  .button { transition: filter 150ms ease, transform 150ms ease; }
+}
+@media (max-width: 1023px) {
+  .shell { width: calc(100% - 64px); }
+  .hero { gap: 30px; grid-template-columns: .9fr 1.1fr; padding-top: 46px; }
+  h1 { font-size: 44px; }
+  .hero-description { font-size: 15px; }
+  .hero-actions { gap: 16px; }
+  .button { padding-inline: 16px; gap: 16px; }
+  .workflow { grid-template-columns: 1fr; gap: 28px; }
+  .workflow-steps { max-width: 520px; }
+  .install-layout { gap: 36px; }
+  .use-cases { gap: 48px; }
+}
+@media (max-width: 767px) {
+  .shell { width: calc(100% - 40px); }
+  .site-header { height: 76px; }
+  .brand { font-size: 18px; gap: 6px; }
+  .brand img { width: 34px; height: 34px; }
+  nav { gap: 20px; font-size: 13px; }
+  .faq-nav { display: none; }
+  .hero { grid-template-columns: 1fr; gap: 38px; padding-block: 36px 28px; }
+  h1 { font-size: clamp(40px, 8.5vw, 56px); }
+  .eyebrow { margin-bottom: 18px; }
+  .hero-description { margin-top: 20px; max-width: 30em; font-size: 16px; }
+  .hero-actions { margin-top: 24px; gap: 24px; }
+  .button { padding-inline: 20px; }
+  figcaption { text-align: left; font-size: 11px; }
+  .release-note { padding-block: 20px; }
+  .release-note strong { display: block; margin-bottom: 6px; }
+  .release-note p + p { margin-top: 10px; }
+  .use-cases { grid-template-columns: 1fr; gap: 30px; padding-block: 36px 40px; }
+  .use-cases h2 { font-size: 23px; }
+  .use-cases p { margin-top: 10px; }
+  .workflow { padding: 28px 24px; }
+  .workflow h2 { font-size: 22px; }
+  .workflow-steps { gap: 12px; grid-template-columns: 1.1fr .8fr 1fr; }
+  .workflow-steps strong { font-size: 14px; }
+  .workflow-steps li > span:last-child { font-size: 11px; white-space: normal; }
+  .shortcut { gap: 3px; }
+  .shortcut kbd { min-width: 22px; padding-inline: 4px; }
+  .section { padding-top: 58px; }
+  .section-heading { margin-bottom: 28px; }
+  .section-heading h2 { font-size: 27px; }
+  .install-layout { grid-template-columns: 1fr; gap: 8px; }
+  .install-help { padding: 25px; }
+  .faq { padding-bottom: 60px; }
+  summary { font-size: 15px; padding-block: 20px; }
+  .site-footer { align-items: start; flex-direction: column; gap: 22px; }
+}
+@media (max-width: 374px) {
+  nav { gap: 12px; }
+  .brand { font-size: 16px; }
+  .hero-actions { gap: 16px; }
+  .button { padding-inline: 14px; }
+  .workflow { padding-inline: 18px; }
+}
